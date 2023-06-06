@@ -1,0 +1,5 @@
+msgpack
+numpy
+tqdm
+loguru
+maturin
