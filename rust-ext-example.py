@@ -1,4 +1,5 @@
 import time
+from typing import Iterator
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import numpy as np
 import msgpack
@@ -20,27 +21,25 @@ def iterate_msgpack(filename):
             logger.error(e)
 
 
-def take_iter_py(iterator):
-    # np_vectors = []
-    # for bytes_vector in iterator:
-    #     vector = np.frombuffer(bytes_vector, dtype=np.float32).reshape(SIZE_ARRAY_DIM)
-    #     np_vectors.append(vector)
-    # np_vectors = np.array(np_vectors)
-
-    np_vectors = np.empty((COUNT_PER_MSGPACK_UPPERBOUND, SIZE_ARRAY_DIM), dtype=np.float32)
+def take_iter_py(iterator: Iterator[bytes], np_vectors: np.ndarray) -> int:
     idx = 0
     for bytes_vector in iterator:
-        vector = np.frombuffer(bytes_vector, dtype=np.float32).reshape(SIZE_ARRAY_DIM)
-        np_vectors[idx] = vector
+        try:
+            vector = np.frombuffer(bytes_vector, dtype=np.float32).reshape(SIZE_ARRAY_DIM)
+            np_vectors[idx] = vector
+        except ValueError:
+            print(f"array size does not match at {idx}!")
+            continue
         idx += 1
-    np_vectors = np_vectors[:idx]
 
-    return np_vectors
+    return idx
 
 
 def process_py(filepath):
     t = time.time()
-    np_vectors = take_iter_py(iterate_msgpack(filepath))
+    np_vectors = np.empty((COUNT_PER_MSGPACK_UPPERBOUND, SIZE_ARRAY_DIM), dtype=np.float32)
+    count = take_iter_py(iterate_msgpack(filepath), np_vectors)
+    np_vectors = np_vectors[:count]
 
     # print(f"{np_vectors[-1, :5]}")
     # logger.debug(f"take_iter_py took {time.time() - t:.2f} seconds.")

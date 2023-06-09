@@ -23,7 +23,7 @@ fn copy_array(
         }
         return Ok(());
     } else {
-        return Err("array size does not match!".to_string());
+        return Err(format!("array size does not match at {idx}!"));
     };
 }
 
@@ -49,13 +49,13 @@ fn rust_ext(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
             let mut idx = 0;
             for &bytes_vector in raw_list.iter() {
                 match copy_array(&mut vectors, bytes_vector, idx) {
-                    Ok(_) => {
-                        idx += 1;
-                    }
                     Err(e) => {
                         println!("Error: {}", e);
+                        continue;
                     }
+                    Ok(_) => {}
                 }
+                idx += 1;
             }
             Ok(idx)
         })
