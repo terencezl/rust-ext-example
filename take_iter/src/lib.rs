@@ -5,7 +5,11 @@ use pyo3::types::{PyBytes, PyIterator};
 
 static SIZE_ARRAY_DIM: usize = 512;
 
-fn copy_array(vectors: &mut ArrayViewMutD<'_, f32>, bytes_vector: &[u8], idx: usize) {
+fn copy_array(
+    vectors: &mut ArrayViewMutD<'_, f32>,
+    bytes_vector: &[u8],
+    idx: usize,
+) -> Result<(), String> {
     if bytes_vector.len() == SIZE_ARRAY_DIM * 4 {
         // f32 from msgpack
         // copy bytes in f32 le format to vectors at idx
@@ -17,8 +21,9 @@ fn copy_array(vectors: &mut ArrayViewMutD<'_, f32>, bytes_vector: &[u8], idx: us
         ) {
             *dst = src;
         }
+        return Ok(());
     } else {
-        println!("array size does not match!");
+        return Err("array size does not match!".to_string());
     };
 }
 
@@ -31,7 +36,7 @@ fn rust_ext(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
         mut np_vectors: PyReadwriteArrayDyn<f32>,
     ) -> PyResult<usize> {
         // First collect bytes in a Rust-native vector.
-        // We can’t release the GIL here because we are dealing with a Python object.
+        // We can't release the GIL here because we are dealing with a Python object.
         let mut raw_list: Vec<&[u8]> = vec![];
         for item in iter {
             raw_list.push(item?.downcast::<PyBytes>()?.as_bytes());
@@ -43,8 +48,14 @@ fn rust_ext(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
         py.allow_threads(|| {
             let mut idx = 0;
             for &bytes_vector in raw_list.iter() {
-                copy_array(&mut vectors, bytes_vector, idx);
-                idx += 1;
+                match copy_array(&mut vectors, bytes_vector, idx) {
+                    Ok(_) => {
+                        idx += 1;
+                    }
+                    Err(e) => {
+                        println!("Error: {}", e);
+                    }
+                }
             }
             Ok(idx)
         })
