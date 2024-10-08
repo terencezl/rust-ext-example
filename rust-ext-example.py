@@ -10,6 +10,7 @@ import rust_ext
 SIZE_ARRAY_DIM = 512
 COUNT_PER_MSGPACK_UPPERBOUND = 50000
 
+
 def iterate_msgpack(filename):
     with open(filename, "rb") as handle:
         unpacker = msgpack.Unpacker(handle)
@@ -25,7 +26,9 @@ def take_iter_py(iterator: Iterator[bytes], np_vectors: np.ndarray) -> int:
     idx = 0
     for bytes_vector in iterator:
         try:
-            vector = np.frombuffer(bytes_vector, dtype=np.float32).reshape(SIZE_ARRAY_DIM)
+            vector = np.frombuffer(bytes_vector, dtype=np.float32).reshape(
+                SIZE_ARRAY_DIM
+            )
             np_vectors[idx] = vector
         except ValueError:
             print(f"array size does not match at {idx}!")
@@ -37,7 +40,9 @@ def take_iter_py(iterator: Iterator[bytes], np_vectors: np.ndarray) -> int:
 
 def process_py(filepath):
     t = time.time()
-    np_vectors = np.empty((COUNT_PER_MSGPACK_UPPERBOUND, SIZE_ARRAY_DIM), dtype=np.float32)
+    np_vectors = np.empty(
+        (COUNT_PER_MSGPACK_UPPERBOUND, SIZE_ARRAY_DIM), dtype=np.float32
+    )
     count = take_iter_py(iterate_msgpack(filepath), np_vectors)
     np_vectors = np_vectors[:count]
 
@@ -48,7 +53,9 @@ def process_py(filepath):
 
 def process_rs(filepath):
     t = time.time()
-    np_vectors = np.empty((COUNT_PER_MSGPACK_UPPERBOUND, SIZE_ARRAY_DIM), dtype=np.float32)
+    np_vectors = np.empty(
+        (COUNT_PER_MSGPACK_UPPERBOUND, SIZE_ARRAY_DIM), dtype=np.float32
+    )
     count = rust_ext.take_iter(iterate_msgpack(filepath), np_vectors)
     np_vectors = np_vectors[:count]
 
