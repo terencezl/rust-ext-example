@@ -59,13 +59,13 @@ fn rust_ext(m: &Bound<PyModule>) -> PyResult<()> {
         // Bytes are read as f32 arrays and copied into the passed in NumPy array.
         // We release the GIL here so other Python threads can run in true parallelism.
         py.allow_threads(|| {
-            if raw_list.len() > vectors.shape()[0] {
+            if raw_list.len() > vectors.dim().0 {
                 return Err(PyValueError::new_err("Too many items in iterator!"));
             }
-            if vectors.shape()[1] != SIZE_ARRAY_DIM {
+            if vectors.dim().1 != SIZE_ARRAY_DIM {
                 return Err(PyValueError::new_err(format!(
                     "2D NumPy array has {} columns, does not match {}!",
-                    vectors.shape()[1],
+                    vectors.dim().1,
                     SIZE_ARRAY_DIM
                 )));
             }
