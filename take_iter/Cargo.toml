@@ -17,3 +17,5 @@ crate-type = ["cdylib"]
 [dependencies]
 pyo3 = { version = "0.21", features = ["extension-module"] }
 numpy = { version = "0.21", features = ["half"] }
+rmp = "0.8.14"
+anyhow = "1.0.89"
