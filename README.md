@@ -4,7 +4,7 @@ This is an example of a Rust extension for Python, using PyO3 and rust-numpy. Se
 
 ## Files
 
-```
+```text
 create-msgpack.py - script to create the input msgpack file
 process-empty.py - script that demonstrates the (de-)serialization cost of big NumPy arrays through process workers
 rust-ext-example.py - script that demonstrates the main example

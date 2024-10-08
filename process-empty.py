@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     pool = ProcessPoolExecutor(max_workers=N_workers)
 
-    logger.info("With native Python / process pool:")
+    logger.info("With Python / process pool:")
     futures = []
     for _ in range(N_tasks):
         futures.append(pool.submit(func))

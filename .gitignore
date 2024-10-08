@@ -21,5 +21,5 @@ target/
 *.msgpack
 .DS_Store
 lib-orig.rs
-thread-native.py
+thread-py.py
 thread-rs.py
